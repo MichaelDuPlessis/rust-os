@@ -1,10 +1,12 @@
 #![no_std]
 #![no_main]
+#![feature(abi_x86_interrupt)]
 // tests
 #![feature(custom_test_frameworks)]
 #![test_runner(os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+mod interrupts;
 mod serial;
 mod vga_buffer;
 
@@ -14,9 +16,15 @@ use core::panic::PanicInfo;
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
 
+    os::init();
+
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
 
+    println!("It did not crash");
     loop {}
 }
 
